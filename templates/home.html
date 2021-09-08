@@ -8,6 +8,11 @@
 <body>
   <form action="/chat">
   <h1>My Chat App</h1>
+  <h2>
+    Hi{% if current_user.is_authenticated %} 
+    {{ current_user.username }}!
+    {% else %} Guest, Please Login {% endif %}
+  </h2>
   <form>
     <div>
       <label>Enter your username:</label>
