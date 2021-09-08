@@ -7,24 +7,18 @@
 
 <body>
   <form action="/chat">
-  <h1>My Chat App</h1>
-  <h2>
-    Hi{% if current_user.is_authenticated %} 
-    {{ current_user.username }}!
-    {% else %} Guest, Please Login {% endif %}
-  </h2>
-  <form>
-    <div>
-      <label>Enter your username:</label>
-      <input type="text" name="username">
-    </div>
-    <div> 
-    <label>Enter your Room ID</label>
-    <input type="text" name="room">
-    <div>
-      <button type="submit" class="btn">Submit</button>
-    </div>
-  </form>
-</body>
+    <h1>My Chat App</h1>
+    <h2>
+      Hi{% if current_user.is_authenticated %}
+      {{ current_user.username }}!
+      {% else %} Guest, Please Login {% endif %}
+    </h2>
+    <ul>
+      {% for room in rooms %}
+      <li>{{ room.room_name }}</li>
+      {% endfor %}
+    </ul>
+
+</body> 
 
 </html>

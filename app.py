@@ -1,12 +1,16 @@
-from re import S
+
 from flask import Flask, render_template, url_for, redirect, request
+
 from flask_socketio import SocketIO, join_room, leave_room
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from db import get_user, save_user
+
 from pymongo.errors import DuplicateKeyError
 
+from db import get_user, save_user, save_room, add_room_members, get_rooms_for_user, get_room
+
+
 app = Flask(__name__)
-app.secret_key = "SECRET KEY"
+app.secret_key = "SECRET_KEY"
 socketio = SocketIO(app)
 
 login_manager = LoginManager()
@@ -16,7 +20,11 @@ login_manager.init_app(app)
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    rooms = []
+    
+    if current_user.is_authenticated:
+        rooms = get_rooms_for_user(current_user.username)
+    return render_template("home.html", rooms=rooms)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -45,7 +53,7 @@ def signup():
     
     if current_user.is_authenticated:
         return redirect(url_for("home"))
-    
+
     message = ""
     if request.method == "POST":
         username = request.form.get("username")
@@ -66,6 +74,29 @@ def signup():
 def logout():
     logout_user()
     return redirect(url_for("home"))
+
+
+@app.route("/create-room/", methods=["GET", "POST"])
+@login_required
+def create_room():
+    message = ''
+    if request.method == "POST":
+        room_name = request.form.get("room_name")
+        usernames = [
+            username.strip() for username in request.form.get("members").split(',')
+            ]
+        
+        if len(room_name) and len(usernames):
+            room_id = save_room(room_name, current_user.username)
+            if current_user.username in usernames:
+                usernames.remove(current_user.username)
+                
+            add_room_members(room_id, room_name, usernames, current_user.username)
+            return redirect(url_for("view_room", room_id=room_id))
+        else:
+            message = "Failed to create room"
+            
+    return render_template("create_room.html", message=message)
 
 
 @app.route("/chat")
