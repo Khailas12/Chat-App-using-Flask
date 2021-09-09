@@ -54,7 +54,7 @@
 
     window.onbeforeunload = function () {
         socket.emit('leave_room', {
-            username: "{{ usernaeme }}",
+            username: "{{ username }}",
             room: "{{ room._id }}"
         })
     };
