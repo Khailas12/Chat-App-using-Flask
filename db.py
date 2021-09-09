@@ -11,6 +11,7 @@ chat_db = client.get_database('ChatDB')
 users_collection = chat_db.get_collection('users')
 rooms_collection = chat_db.get_collection("rooms")
 room_members_collection = chat_db.get_collection("room_members")
+message_collection = chat_db.get_collection("message")
 
 
 def save_user(username, email, password):
@@ -37,7 +38,7 @@ def get_user(username):
 def save_room(room_name, created_by):
     room_id = rooms_collection.insert_one(
         {
-            "room_name": room_name,
+            "name": room_name,
             "created_by": created_by, 
             "created_at": datetime.now()
         }
@@ -53,14 +54,14 @@ def update_room(room_id, room_name):
         },
         {
             "$set": {
-                "name": room_name
+                "room_name": room_name
             }
         }
     )
 
 
 def get_room(room_id):
-    rooms_collection.find_one(
+    return rooms_collection.find_one(
         {
             "_id": ObjectId(room_id)
         }
@@ -93,7 +94,7 @@ def add_room_members(room_id, room_name, usernames, added_by):
                 "added_by": added_by,
                 "added_at": datetime.now(),
                 "is_room_admin": False
-                
+            
             } for username in usernames
         ]
     )
@@ -121,7 +122,7 @@ def get_room_members(room_id):
     
 
 def get_rooms_for_user(username):
-    list(room_members_collection.find(
+    return list(room_members_collection.find(
         {
             "_id.username": username
         }
@@ -133,7 +134,7 @@ def is_room_member(room_id, username):
         {
             "_id":{
                 "room_id": ObjectId(room_id),
-                username: username
+                "username": username
             }
         }
     )
@@ -144,7 +145,7 @@ def is_room_admin(room_id, username):
         {
             "_id": {
                 "room_id": ObjectId(room_id),
-                username: username,
+                "username": username,
                 "is_room_admin": True
             }
         }

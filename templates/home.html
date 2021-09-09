@@ -6,7 +6,6 @@
 </head>
 
 <body>
-  <form action="/chat">
     <h1>My Chat App</h1>
     <h2>
       Hi{% if current_user.is_authenticated %}
@@ -15,7 +14,7 @@
     </h2>
     <ul>
       {% for room in rooms %}
-      <li>{{ room.room_name }}</li>
+      <li><a href="rooms/{{ room._id.room_id }}"> {{ room.room_name }}</a></li>
       {% endfor %}
     </ul>
 

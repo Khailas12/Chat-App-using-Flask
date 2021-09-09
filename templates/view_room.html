@@ -15,7 +15,7 @@
         integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
         crossorigin="anonymous"></script> -->
 
-    <h1>Welcome to the ChatRoom {{ room }}</h1>
+    <h1>Welcome to the ChatRoom {{ room.name }}</h1>
 
     <div id="messages"></div>
     <form id="message_input_form">
@@ -32,7 +32,7 @@
     socket.on('connect', function () {
         socket.emit("join_room", {
             username: "{{ username }}", 
-            room: "{{ room }}"
+            room: "{{ room._id }}"
         });
 
         let message_input = document.getElementById("message_input");
@@ -43,7 +43,7 @@
             if (message.length) {
                 socket.emit('send_message', {
                     username: "{{ username }}",
-                    room: "{{ room }}",
+                    room: "{{ room._id }}",
                     message: message
                 })
             }
@@ -51,6 +51,13 @@
             message_input.focus();                    
         }
     });
+
+    window.onbeforeunload = function () {
+        socket.emit('leave_room', {
+            username: "{{ usernaeme }}",
+            room: "{{ room._id }}"
+        })
+    };
 
     socket.on('receive_message', function (data) {
         console.log(data);

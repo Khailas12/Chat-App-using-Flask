@@ -1,12 +1,11 @@
-
 from flask import Flask, render_template, url_for, redirect, request
-
+from bson.json_util import dumps
 from flask_socketio import SocketIO, join_room, leave_room
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 from pymongo.errors import DuplicateKeyError
 
-from db import get_user, save_user, save_room, add_room_members, get_rooms_for_user, get_room
+from db import get_user, save_user, save_room, add_room_members, get_rooms_for_user, get_room, get_room_members, is_room_member
 
 
 app = Flask(__name__)
@@ -99,16 +98,15 @@ def create_room():
     return render_template("create_room.html", message=message)
 
 
-@app.route("/chat")
+@app.route("/rooms/<room_id>/")
 @login_required
-def chat():
-    username = request.args.get("username")
-    room = request.args.get("room")
-
-    if username and room:
-        return render_template("chat.html", username=username, room=room)
+def view_room(room_id):
+    room = get_room(room_id)
+    if room and is_room_member(current_user.username):
+        room_members = get_room_members(room_id)
+        return render_template("view_room.html", room=room, room_members=room_members)
     else:
-        return redirect(url_for("home"))
+        return 'Room not found', 404
 
 
 @login_manager.user_loader
